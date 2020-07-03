@@ -390,6 +390,9 @@ class mysqli_native_moodle_database extends moodle_database {
             // Other engines are not supported, most probably not compatible.
             $this->compressedrowformatsupported = false;
 
+        } else if ($this->is_compression_default_enabled()) {
+            $this->compressedrowformatsupported = false;
+
         } else if (!$this->is_file_per_table_enabled()) {
             $this->compressedrowformatsupported = false;
 
@@ -402,6 +405,20 @@ class mysqli_native_moodle_database extends moodle_database {
         }
 
         return $this->compressedrowformatsupported;
+    }
+
+    /**
+     * Check the database to see if innodb_compression_default is on.
+     *
+     * @return bool True if on otherwise false.
+     */
+    public function is_compression_default_enabled() {
+        if ($compressiondefault = $this->get_record_sql("SHOW VARIABLES LIKE 'innodb_compression_default'")) {
+            if ($compressiondefault->value == 'ON') {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
